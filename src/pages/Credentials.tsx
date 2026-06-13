@@ -98,13 +98,12 @@ const CredentialCard = ({ credential }: { credential: Credential }) => {
   const [totp, setTotp] = useState<string>('');
 
   useEffect(() => {
-    if (credential.twoFaSecret) {
-      setTotp(generateTOTP(credential.twoFaSecret));
-      const interval = setInterval(() => {
-        setTotp(generateTOTP(credential.twoFaSecret!));
-      }, 1000);
-      return () => clearInterval(interval);
-    }
+    if (!credential.twoFaSecret) return;
+    generateTOTP(credential.twoFaSecret).then(setTotp);
+    const interval = setInterval(() => {
+      generateTOTP(credential.twoFaSecret!).then(setTotp);
+    }, 1000);
+    return () => clearInterval(interval);
   }, [credential.twoFaSecret]);
 
   const handleCopy = (field: string, value: string) => {
