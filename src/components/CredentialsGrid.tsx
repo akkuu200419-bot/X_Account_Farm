@@ -205,6 +205,7 @@ export default function CredentialsGrid({ onCopy }: CredentialsGridProps) {
   const [fromDb, setFromDb] = useState(false);
 
   useEffect(() => {
+    if (!supabase) return;
     supabase
       .from('twitter_accounts')
       .select('*')

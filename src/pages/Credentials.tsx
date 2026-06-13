@@ -237,9 +237,10 @@ export default function Credentials() {
   const [isSupabase, setIsSupabase] = useState(false);
 
   useEffect(() => {
+    if (!supabase) return;
     const fetchFromSupabase = async () => {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabase!
           .from('twitter_accounts')
           .select('*')
           .eq('status', 'ok')
