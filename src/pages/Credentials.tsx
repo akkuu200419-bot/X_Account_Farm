@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Shield, Copy, Check, Eye, EyeOff, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Shield, Copy, Check, Eye, EyeOff, Search, ChevronLeft, ChevronRight, ShieldCheck, User, Smartphone, TrendingUp } from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, AreaChart, Area
+} from 'recharts';
 import { credentials, Credential } from '../data/mockData';
 import { supabase, DbAccount } from '../lib/supabase';
 import { generateTOTP, secondsUntilNextWindow } from '../utils/totp';
@@ -284,19 +288,139 @@ export default function Credentials() {
     handle: allCredentials.filter(c => c.handle).length,
   };
 
+  // Analytics data
+  const deviceMap: Record<string, number> = {};
+  allCredentials.forEach(c => {
+    deviceMap[c.deviceId] = (deviceMap[c.deviceId] || 0) + 1;
+  });
+  const deviceChartData = Object.entries(deviceMap)
+    .map(([device, count]) => ({ device: device.slice(-8), count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  const twoFaChartData = [
+    { name: '2FA On', value: counts['2fa'], color: '#00d4ff' },
+    { name: 'No 2FA', value: counts.all - counts['2fa'], color: '#1e2d3d' },
+  ];
+
+  const creationTrend: Record<string, number> = {};
+  allCredentials.forEach(c => {
+    const day = c.createdAt.slice(0, 10);
+    if (day) creationTrend[day] = (creationTrend[day] || 0) + 1;
+  });
+  const trendData = Object.entries(creationTrend)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({ date: date.slice(5), count }));
+
+  const uniqueDevices = Object.keys(deviceMap).length;
+  const twoFaPct = counts.all > 0 ? Math.round((counts['2fa'] / counts.all) * 100) : 0;
+  const handlePct = counts.all > 0 ? Math.round((counts.handle / counts.all) * 100) : 0;
+
   return (
     <div className="min-h-screen bg-[#0a0e1a] p-8">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4 flex-wrap">
-          <h1 className="text-2xl font-mono font-bold text-[#e6edf3]">credentials</h1>
-          {isSupabase && (
-            <span className="text-xs font-mono px-2 py-1 bg-[#0d1117] border border-[#1e2d3d] text-[#8b949e] rounded">
-              supabase
-            </span>
-          )}
+      {/* Analytics Section */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-mono font-bold text-[#e6edf3] mb-5">credentials</h1>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-4 gap-4 mb-5">
+          <div className="bg-gradient-to-br from-[#00ff41]/15 to-[#00ff41]/5 border border-[#00ff41]/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <User className="text-[#00ff41]" size={18} />
+              {isSupabase && <span className="text-[10px] font-mono text-[#00ff41]/60 bg-[#00ff41]/10 px-1.5 py-0.5 rounded">live</span>}
+            </div>
+            <div className="text-3xl font-bold text-white leading-none">{counts.all}</div>
+            <div className="text-[#8b949e] text-xs font-mono mt-1">Total Accounts</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-[#00d4ff]/15 to-[#00d4ff]/5 border border-[#00d4ff]/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <ShieldCheck className="text-[#00d4ff]" size={18} />
+              <span className="text-[10px] font-mono text-[#00d4ff] bg-[#00d4ff]/10 px-1.5 py-0.5 rounded">{twoFaPct}%</span>
+            </div>
+            <div className="text-3xl font-bold text-white leading-none">{counts['2fa']}</div>
+            <div className="text-[#8b949e] text-xs font-mono mt-1">2FA Enabled</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-yellow-400/15 to-yellow-400/5 border border-yellow-400/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <TrendingUp className="text-yellow-400" size={18} />
+              <span className="text-[10px] font-mono text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded">{handlePct}%</span>
+            </div>
+            <div className="text-3xl font-bold text-white leading-none">{counts.handle}</div>
+            <div className="text-[#8b949e] text-xs font-mono mt-1">With Handle</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-pink-400/15 to-pink-400/5 border border-pink-400/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <Smartphone className="text-pink-400" size={18} />
+            </div>
+            <div className="text-3xl font-bold text-white leading-none">{uniqueDevices}</div>
+            <div className="text-[#8b949e] text-xs font-mono mt-1">Unique Devices</div>
+          </div>
         </div>
 
+        {/* Mini Charts */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* Accounts per device */}
+          <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-xl p-4">
+            <h3 className="text-[10px] font-mono text-[#8b949e] uppercase tracking-widest mb-3">Accounts per Device</h3>
+            <ResponsiveContainer width="100%" height={110}>
+              <BarChart data={deviceChartData} layout="vertical" margin={{ left: 0, right: 8, top: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                <XAxis type="number" stroke="#8b949e" fontSize={10} />
+                <YAxis dataKey="device" type="category" stroke="#8b949e" fontSize={9} width={58} />
+                <Tooltip contentStyle={{ backgroundColor: '#0d1117', border: '1px solid #1e2d3d', borderRadius: '6px', fontSize: 11 }} />
+                <Bar dataKey="count" fill="#00ff41" radius={[0, 3, 3, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* 2FA Coverage Pie */}
+          <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-xl p-4">
+            <h3 className="text-[10px] font-mono text-[#8b949e] uppercase tracking-widest mb-3">2FA Coverage</h3>
+            <ResponsiveContainer width="100%" height={110}>
+              <PieChart>
+                <Pie data={twoFaChartData} cx="50%" cy="50%" innerRadius={30} outerRadius={48} paddingAngle={3} dataKey="value">
+                  {twoFaChartData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: '#0d1117', border: '1px solid #1e2d3d', borderRadius: '6px', fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex justify-center gap-4 mt-1">
+              {twoFaChartData.map(d => (
+                <div key={d.name} className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
+                  <span className="text-[10px] font-mono text-[#8b949e]">{d.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Creation Trend */}
+          <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-xl p-4">
+            <h3 className="text-[10px] font-mono text-[#8b949e] uppercase tracking-widest mb-3">Creation Trend</h3>
+            <ResponsiveContainer width="100%" height={110}>
+              <AreaChart data={trendData} margin={{ left: -20, right: 4, top: 4, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="credGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#00d4ff" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#00d4ff" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e2d3d" />
+                <XAxis dataKey="date" stroke="#8b949e" fontSize={9} />
+                <YAxis stroke="#8b949e" fontSize={9} />
+                <Tooltip contentStyle={{ backgroundColor: '#0d1117', border: '1px solid #1e2d3d', borderRadius: '6px', fontSize: 11 }} />
+                <Area type="monotone" dataKey="count" stroke="#00d4ff" fill="url(#credGrad)" strokeWidth={1.5} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div className="mb-6">
         {/* Stats (left) + Search (right) - Same Row */}
         <div className="flex items-center justify-between gap-4">
           {/* Stats - Left side */}

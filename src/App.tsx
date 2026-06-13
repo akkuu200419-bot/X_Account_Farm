@@ -3,10 +3,9 @@ import Navbar from './components/Navbar';
 import DeviceManager from './pages/DeviceManager';
 import LiveLog from './pages/LiveLog';
 import Credentials from './pages/Credentials';
-import PostReposter from './pages/PostReposter';
+import PostActions from './pages/PostActions';
 import OutlookFarm from './pages/OutlookFarm';
 import TwPwaFarm from './pages/TwPwaFarm';
-import PostLiker from './pages/PostLiker';
 import LoginFarm from './pages/LoginFarm';
 import Analytics from './pages/Analytics';
 import Toast, { ToastData } from './components/Toast';
@@ -45,11 +44,10 @@ export default function App() {
             <Route path="/analytics"    element={<Analytics />} />
             <Route path="/device-mgr"    element={<DeviceManager />} />
             <Route path="/live-log"      element={<LiveLog />} />
-            <Route path="/credentials"   element={<Credentials onCopy={addToast} />} />
-            <Route path="/post-reposter" element={<PostReposter />} />
+            <Route path="/credentials"   element={<Credentials />} />
+            <Route path="/post-actions"  element={<PostActions />} />
             <Route path="/outlook-farm"  element={<OutlookFarm />} />
             <Route path="/tw-pwa-farm"   element={<TwPwaFarm />} />
-            <Route path="/post-liker"    element={<PostLiker />} />
             <Route path="/login-farm"    element={<LoginFarm />} />
           </Routes>
         </main>

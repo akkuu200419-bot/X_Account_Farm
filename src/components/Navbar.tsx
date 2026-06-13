@@ -5,10 +5,9 @@ const NAV_ITEMS = [
   { path: '/device-mgr',    label: 'DEVICE_MGR' },
   { path: '/live-log',      label: 'LIVE_LOG' },
   { path: '/credentials',   label: 'CREDENTIALS' },
-  { path: '/post-reposter', label: 'POST_REPOSTER' },
+  { path: '/post-actions',  label: 'POST_ACTIONS' },
   { path: '/outlook-farm',  label: 'OUTLOOK_FARM' },
   { path: '/tw-pwa-farm',   label: 'TW_PWA_FARM' },
-  { path: '/post-liker',    label: 'POST_LIKER' },
   { path: '/login-farm',    label: 'LOGIN_FARM' },
 ];
 
