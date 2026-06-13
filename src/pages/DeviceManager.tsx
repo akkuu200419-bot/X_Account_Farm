@@ -407,12 +407,12 @@ export default function DeviceManager() {
         <div className="bg-[#0d1117] border border-[#1e2d3d] rounded p-6">
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-mono text-[#8b949e] tracking-widest uppercase">outlook row</label>
+              <label className="text-xs font-mono text-[#8b949e] tracking-widest uppercase">mail row</label>
               <DarkSelect
                 value={selectedRow}
                 onChange={setSelectedRow}
                 options={outlookOptions}
-                placeholder="Select outlook row"
+                placeholder="Select mail row"
               />
             </div>
             <div className="flex flex-col gap-2">

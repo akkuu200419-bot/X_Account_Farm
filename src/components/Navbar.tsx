@@ -7,8 +7,8 @@ const NAV_ITEMS = [
   { path: '/credentials',   label: 'CREDENTIALS' },
   { path: '/post-actions',  label: 'POST_ACTIONS' },
   { path: '/outlook-farm',  label: 'OUTLOOK_FARM' },
-  { path: '/tw-pwa-farm',   label: 'TW_PWA_FARM' },
-  { path: '/login-farm',    label: 'LOGIN_FARM' },
+  { path: '/tw-pwa-farm',   label: 'DEVICE_LOGIN_FARM' },
+  { path: '/login-farm',    label: 'BROWSER_LOGIN_FARM' },
 ];
 
 export default function Navbar() {
